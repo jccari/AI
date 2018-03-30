@@ -18,10 +18,19 @@ public:
 
 	N m_data;
 	vector<Edge*> m_edges;
+
+	N getData() const{
+		return m_data;
+	};
+
+	const vector<Edge *> & getEdges() const{
+		return m_edges;
+	};
 };
 
 template <class G>
 CNode<G>::~CNode(){}
+
 
 template <class G>
 class CEdge

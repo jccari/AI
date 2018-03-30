@@ -1,10 +1,20 @@
 #include "graph.h"
+#include "Point.h"
 #include <iostream>
-
+#include <random>
 using namespace std;
 
+#define TOTALNODES 10
+#define MIN 0 // Lowest X or Y value of any Point
+#define MAX 50 // Highest X or Y value of any Point
+#define RADIO 10
+
+
 template <class N,class E>
-CGraph<N,E>::CGraph(){}
+CGraph<N,E>::CGraph(){
+    generateNodes( TOTALNODES );
+    buildGraph();
+}
 
 template <class N,class E>
 CGraph<N,E>::~CGraph(){}
@@ -83,6 +93,52 @@ bool CGraph<N,E>::removeEdge(E x, N a, N b)
 	return 1;
 }
 
+template <class N,class E>
+void CGraph<N,E>::generateNodes(int numNodes){
+    int x, y;
+    for (int i = 0; i < numNodes ; ++i) {
+        x = getRandomNumber( MIN, MAX);
+        y = getRandomNumber( MIN , MAX);
+
+        Point* newPoint = new Point();
+        newPoint->setX( x );
+        newPoint->setY( y );
+
+        insertNode( *newPoint );
+    }
+};
+
+template <class N,class E>
+void CGraph<N,E>::buildGraph(){
+    cout << "\n[OK]: Building graph " << endl;
+    float distance;
+    Point* point;
+    Point* nextPoint;
+    for (int i = 0; i < getNodesList().size()-1 ; ++i) {
+        point = &getNodesList()[i]->m_data  ;
+        for (int j = 0; j < getNodesList().size()-1 ; ++j) {
+            nextPoint = & getNodesList()[j]->m_data;
+
+            if ( i != j ){
+                distance = point->calculateDistance( *nextPoint );
+                cout << "- " << distance << " | " << *point << " to " << *nextPoint << endl;
+                if ( distance <= RADIO){
+                    insertEdge(distance, *point, *nextPoint);
+                }
+            }
+
+        }
+    }
+};
+
+template <class N,class E>
+int CGraph<N,E>::getRandomNumber(int min, int max) {
+    std::mt19937 rng;
+    rng.seed(std::random_device()());
+    std::uniform_int_distribution<std::mt19937::result_type> dist( min, max); // distribution in range [min, max]
+
+    return static_cast<int>( dist(rng) );
+};
 
 
 template <class N,class E>
@@ -107,3 +163,5 @@ void CGraph<N,E>::printEdges()
 	}
 	
 }
+
+
