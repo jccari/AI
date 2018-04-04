@@ -2,12 +2,13 @@
 #include "Point.h"
 #include <iostream>
 #include <random>
+#include <algorithm>
 using namespace std;
 
-#define TOTALNODES 10
+#define TOTALNODES 5
 #define MIN 0 // Lowest X or Y value of any Point
-#define MAX 50 // Highest X or Y value of any Point
-#define RADIO 10
+#define MAX 10 // Highest X or Y value of any Point
+#define RADIO 4
 
 
 template <class N,class E>
@@ -31,7 +32,7 @@ bool CGraph<N,E>::insertNode(N x)
 template <class N,class E>
 bool CGraph<N,E>::insertEdge(E x, N a, N b)
 {
-	Node* Na ;Node* Nb;
+	Node* Na = nullptr; Node* Nb = nullptr;
 	for(int i=0; i< m_nodes.size() ;i++){
 		if(m_nodes[i]->m_data == a ) Na = m_nodes[i];
 		if(m_nodes[i]->m_data == b ) Nb = m_nodes[i];
@@ -44,8 +45,8 @@ bool CGraph<N,E>::insertEdge(E x, N a, N b)
 
 	Edge* tmp = new Edge(x,Na, Nb);
 	Na->m_edges.push_back( new Edge(x,Na, Nb) );
-    if ( Na != Nb)
-	    Nb->m_edges.push_back( new Edge(x,Nb, Na) );
+    //if ( Na != Nb)
+	//    Nb->m_edges.push_back( new Edge(x,Nb, Na) );
 
 	cout << ">> [OK]: Edge "<< Na->m_data << " to "<< Nb->m_data << " Insertion Successful" << endl;
 	return 1;
@@ -114,9 +115,9 @@ void CGraph<N,E>::buildGraph(){
     float distance;
     Point* point;
     Point* nextPoint;
-    for (int i = 0; i < getNodesList().size()-1 ; ++i) {
+    for (int i = 0; i < getNodesList().size() ; ++i) {
         point = &getNodesList()[i]->m_data  ;
-        for (int j = 0; j < getNodesList().size()-1 ; ++j) {
+        for (int j = 0; j < getNodesList().size() ; ++j) {
             nextPoint = & getNodesList()[j]->m_data;
 
             if ( i != j ){
@@ -140,6 +141,39 @@ int CGraph<N,E>::getRandomNumber(int min, int max) {
     return static_cast<int>( dist(rng) );
 };
 
+template<class N, class E>
+void CGraph<N,E>::pathBetweenNodes(N from, N To, vector<N> &vec){
+    Node *fromNode = nullptr;
+    Node* ToNode = nullptr;
+    for(const auto &node: m_nodes){
+        if(node->m_data == from) fromNode = node;
+        if(node->m_data == To) ToNode = node;
+    }
+    vector<Node*>vec2;
+    this->pathBetweenNodesRecursive(fromNode, To, vec2);
+    vec2.push_back(fromNode);
+    for(const auto &i: vec2)vec.push_back(i->m_data);
+};
+
+template<class N, class E>
+bool CGraph<N,E>::pathBetweenNodesRecursive(Node* current, N To, vector<Node*> &vec){
+    if(current == nullptr) return false;
+    if(current->m_data == To) {
+        return true;
+    }
+    current->visited = true;
+    vector<Edge*> vec2(current->m_edges);
+    std::sort(vec2.begin(), vec2.end(), comparesTwoEdges(current->m_data, To));
+    for(auto &edge: vec2){
+    	if(!edge->m_node[1]->visited){
+    	    if (pathBetweenNodesRecursive(edge->m_node[1], To, vec)){
+    	    	vec.push_back(edge->m_node[1]);
+    	        return true;
+    	    }
+    	}
+    }
+    return false;
+};
 
 template <class N,class E>
 void CGraph<N,E>::printNodes()
@@ -156,6 +190,7 @@ void CGraph<N,E>::printEdges()
 {
 	cout << "\n Edges List: "<< endl;
 	for(int i=0; i<m_nodes.size();i++){
+	    cout << '[' << i << ']' << "--SIZE-->" << m_nodes[i]->m_edges.size() << endl;
 		for(int j=0; j<m_nodes[i]->m_edges.size();j++){
 			cout << " [ "<<i<<" ] "<< m_nodes[i]->m_edges[j]->m_node[0]->m_data << " to " << m_nodes[i]->m_edges[j]->m_node[1]->m_data 
 				 <<" with " << m_nodes[i]->m_edges[j]->m_data  << endl;

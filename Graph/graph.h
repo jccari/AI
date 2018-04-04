@@ -39,6 +39,20 @@ public:
 
         void printNodes();
         void printEdges();
+        struct comparesTwoEdges{
+            N current, final;
+            comparesTwoEdges(N current, N final){
+                this->current = current;
+                this->final = final;
+            }
+            bool operator ()(Edge* edge1, Edge* edge2) {
+                double w1 = (double)(edge1->m_data) + edge1->m_node[1]->m_data.calculateDistance(final);
+                double w2 = (double)(edge2->m_data) + edge2->m_node[1]->m_data.calculateDistance(final);
+            }
+
+        };
+        void pathBetweenNodes(N from, N To, vector<N> &vec);
+        bool pathBetweenNodesRecursive(Node *, N, vector<Node*> &);
 
         const vector<Node*> & getNodesList() const{
             return m_nodes;

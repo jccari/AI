@@ -13,9 +13,10 @@ public:
 	typedef typename G::Node Node;
 	CNode(N x){
 		m_data = x;
+		this->visited = false;
 	}
 	~CNode();
-
+	bool visited;
 	N m_data;
 	vector<Edge*> m_edges;
 
