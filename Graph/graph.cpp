@@ -5,7 +5,7 @@
 #include <algorithm>
 using namespace std;
 
-#define TOTALNODES 5
+#define TOTALNODES 50
 #define MIN 0 // Lowest X or Y value of any Point
 #define MAX 10 // Highest X or Y value of any Point
 #define RADIO 4
@@ -142,7 +142,7 @@ int CGraph<N,E>::getRandomNumber(int min, int max) {
 };
 
 template<class N, class E>
-void CGraph<N,E>::pathBetweenNodes(N from, N To, vector<N> &vec){
+int CGraph<N,E>::pathBetweenNodes(N from, N To, vector<N> &vec){
     Node *fromNode = nullptr;
     Node* ToNode = nullptr;
     for(const auto &node: m_nodes){
@@ -150,13 +150,15 @@ void CGraph<N,E>::pathBetweenNodes(N from, N To, vector<N> &vec){
         if(node->m_data == To) ToNode = node;
     }
     vector<Node*>vec2;
-    this->pathBetweenNodesRecursive(fromNode, To, vec2);
+    int costo = 0;
+    this->pathBetweenNodesRecursive(fromNode, To, vec2, costo);
     vec2.push_back(fromNode);
     for(const auto &i: vec2)vec.push_back(i->m_data);
+    return costo;
 };
 
 template<class N, class E>
-bool CGraph<N,E>::pathBetweenNodesRecursive(Node* current, N To, vector<Node*> &vec){
+bool CGraph<N,E>::pathBetweenNodesRecursive(Node* current, N To, vector<Node*> &vec, int& costo){
     if(current == nullptr) return false;
     if(current->m_data == To) {
         return true;
@@ -166,8 +168,9 @@ bool CGraph<N,E>::pathBetweenNodesRecursive(Node* current, N To, vector<Node*> &
     std::sort(vec2.begin(), vec2.end(), comparesTwoEdges(current->m_data, To));
     for(auto &edge: vec2){
     	if(!edge->m_node[1]->visited){
-    	    if (pathBetweenNodesRecursive(edge->m_node[1], To, vec)){
+    	    if (pathBetweenNodesRecursive(edge->m_node[1], To, vec,costo)){
     	    	vec.push_back(edge->m_node[1]);
+                costo += edge->m_data;
     	        return true;
     	    }
     	}
